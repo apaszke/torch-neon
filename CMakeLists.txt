@@ -1,0 +1,21 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
+
+FIND_PACKAGE(Torch REQUIRED)
+FIND_PACKAGE(CUDA 7.5 REQUIRED)
+
+FILE(GLOB luasrc *.lua)
+SET(src-cuda "links/C_interface/nervana_c_api.cu")
+FILE(GLOB cubin links/cubin/*.cubin)
+
+LIST(APPEND CUDA_NVCC_FLAGS "-std=c++11 -Xcompiler")
+
+CUDA_ADD_LIBRARY(neon MODULE ${src-cuda})
+TARGET_LINK_LIBRARIES(neon ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY})
+
+ADD_CUSTOM_TARGET(kernels ALL
+    make .venv/bin/activate kernels
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/neon")
+
+MESSAGE("${Torch_INSTALL_PREFIX}/${Torch_INSTALL_LIB_SUBDIR}")
+MESSAGE(${Torch_INSTALL_LUA_PATH_SUBDIR})
+
